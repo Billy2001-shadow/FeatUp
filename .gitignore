@@ -1,1 +1,7 @@
 .env
+/checkpoints/
+/build/
+/__pycache__/
+/.vscode/
+/featup.egg-info/
+**/__pycache__/
