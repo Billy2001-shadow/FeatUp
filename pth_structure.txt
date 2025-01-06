@@ -1,0 +1,4 @@
+# tiny_vit_5m_22kto1k_distill.pth 只有一个键：model  Length: 296  
+# latest_epoch_19.pth 有三个键：model( Length: 442), optimizer, epoch
+# depth_anything_v2_vits.pth 有239个键，直接是权重的名称(pretrained+depth_head)
+# dinov2_jbu_stack_cocostuff_adjust.ckpt 有8个键：state_dict(Length: 42)  epoch global_step pytorch-lightning_version loops callbacks optimizer_states lr_schedulers

@@ -3,6 +3,7 @@ import torchvision.transforms as T
 import matplotlib.pyplot as plt
 from PIL import Image
 from featup.util import norm, unnorm, pca, remove_axes
+
 from tinyjbu import TinyVitJBU
 
 def plot_feats(image, lr, hr, save_path):
@@ -41,9 +42,21 @@ def plot_feats(image, lr, hr, save_path):
 
 
 # 加载模型
-weight_path = "checkpoints/tiny_vit_5m_22kto1k_distill.pth" #  latest_epoch_19
-model = TinyVitJBU(weight_path,use_norm=False)
+model = TinyVitJBU(use_norm=False)
 
+backbone_weight_path = "checkpoints/latest_epoch_19.pth" #  latest_epoch_19
+backbone_state_dict = torch.load(backbone_weight_path,map_location='cuda', weights_only=True)['model']
+backbone_state_dict = {k.replace('pretrained.', ''): v for k, v in backbone_state_dict.items() if 'pretrained.' in k} # 去除pretrained.前缀
+missing_keys, unexpected_keys = model.backbone.load_state_dict(backbone_state_dict, strict=False)
+print(f"Missing keys: {missing_keys}")
+print(f"Unexpected keys: {unexpected_keys}")
+
+upsampler_weight_path = "checkpoints/dinov2_jbu_stack_cocostuff_adjust.ckpt"
+upsampler_state_dict = torch.load(upsampler_weight_path,map_location='cuda', weights_only=True)["state_dict"]
+upsampler_state_dict = {k: v for k, v in upsampler_state_dict.items() if "scale_net" not in k and "downsampler" not in k}
+missing_keys, unexpected_keys = model.upsampler.load_state_dict(upsampler_state_dict, strict=False)
+print(f"Missing keys: {missing_keys}")
+print(f"Unexpected keys: {unexpected_keys}")
 # 加载并处理图像
 input_size = 224
 transform = T.Compose([
@@ -53,7 +66,7 @@ transform = T.Compose([
     norm
 ])
 
-image_path = "/tmp/sample_images/skate.jpg"
+image_path = "sample-images/skate.jpg"
 image = Image.open(image_path).convert('RGB')
 image_tensor = transform(image).unsqueeze(0).cuda()
 
